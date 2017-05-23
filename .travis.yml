@@ -1,11 +1,20 @@
 language: python
 cache: pip
-python: "3.5"
 
-env:
-    - TOXENV=py35
-    - TOXENV=py36
-    - TOXENV=pep8
+matrix:
+  include:
+    - language: python
+      python: "3.5"
+      env: TOXENV=pep8
+
+    - language: python
+      python: "3.5"
+      env: TOXENV=py35
+
+    - language: python
+      python: "3.6"
+      env: TOXENV=py36
+
 install:
     - pip install tox
     - if [ "$TOXENV" = 'py35' ]; then pip install coveralls; fi
