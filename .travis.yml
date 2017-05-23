@@ -3,10 +3,8 @@ cache: pip
 python: "3.5"
 
 env:
-    - TOXENV=py27
-    - TOXENV=py33
-    - TOXENV=py34
     - TOXENV=py35
+    - TOXENV=py36
     - TOXENV=pep8
 install:
     - pip install tox
@@ -28,13 +26,12 @@ after_success:
 # Then replace 'encrypted...' below with the new encryption string (no need to
 # copy the quotes).
 #
-# deploy:
-#     provider: pypi
-#     distributions: "sdist bdist_wheel"
-#     user: seantis
-#     password:
-#       secure: encrypted...
-#     on:
-#         tags: true
-#         condition: $TOXENV = py35
-#
+deploy:
+    provider: pypi
+    distributions: "sdist bdist_wheel"
+    user: seantis
+    password:
+      secure: "ZIToM2zW+pIrTnaiZJX3IJwG69ydbDSF/a/QcPwOECxz0/Av5i88HkR+U2vFsfh9dqFxz4oKCtjVrK1JM+lW26nSWgtMdX7uY2tsR7zAZjmGlu1DD7lLz18KznGuQVFh9Lk6OHXRhkDd76JEJRvo5+one/uqXyAnJKpC5sQgkTADIoNjdSXiQf/RCuMCq7VEyHRx4OZqGwLjSZWDIP0ApUkLd4AwjsJwmQ3P/MiZdYrC4L352ONDzYyAcKmp8XsHy2KyIDjOjtW4hpANlMJv7XJ81gSq5tPdPGm7qhzSrrRr3C6lsFZvb8Be/CZdJhTuYZSqQHK+KWCwVEMjB862G8U7IqD6Fx6hmX5rlaTvLwoAOVQ5I5BJxem9SUkMZBfw20VY7f3QeoMZm6I1A8LzdPmTtw45WsQDmafgvt2LUSSmHmwWacuP4IyTuq7kZT42rB3JlCvJ+YvSuBbce3IfmE73gN8doZOqs/S7oDk/7GZ993MYgF1vA8flSorhHJ4UqnfPEmsLnBqBFgD6Y9WjtE2ZYpT7X6cPCqS4w1LCe5W0by6csT3KDPIpxEFPzVnTS2aV53GYQYi0RNePhgSJSUuvlijFX86pByl3HPNmJ0z2GthCjU4GZQBi2vBtVGpjGa/reOxA23bxSCD4QgSr2j6MtX7QtfSSY0fLr6WI9Bs="
+    on:
+        tags: true
+        condition: $TOXENV = py35
