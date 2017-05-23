@@ -87,6 +87,20 @@ result of the ``/redirect`` request is the result of the proxied url.
 
 If the request was accepted, it is deleted.
 
+Deployment
+----------
+
+The server is implemented using `aiohttp <http://aiohttp.readthedocs.io/en/stable/>`_.
+It requires at least Python 3.5.
+
+Though it might be possible to implement TLS support on the oauth_redirect we
+recommend that you put it behind a proper web proxy like nginx/apache.
+
+To run the server run::
+
+    oauth-redirect --host localhost --port 8080 --database registered --auth <your custom auth code>
+
+
 Run the Tests
 -------------
 
