@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.2.0 (2017-05-24)
+~~~~~~~~~~~~~~~~~~~~~
+
 - Adds the ability to define the HTTP method with which the redirect target
   should be called.
   [href]
