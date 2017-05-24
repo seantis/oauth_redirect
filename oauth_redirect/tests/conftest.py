@@ -1,4 +1,6 @@
+import json
 import morepath
+import os
 import pytest
 import tempfile
 
@@ -18,8 +20,18 @@ def create_wsgi_endpoint_app(output_path):
         pass
 
     @App.view(model=Endpoint, request_method='POST')
-    def view_endpoint(self, request):
-        with (output_path / 'request.json').open('w') as f:
+    def post_endpoint(self, request):
+        with (output_path / 'POST.json').open('w') as f:
+            f.write(request.text)
+
+    @App.view(model=Endpoint, request_method='GET')
+    def get_endpoint(self, request):
+        with (output_path / 'GET.json').open('w') as f:
+            f.write(json.dumps(dict(request.params)))
+
+    @App.view(model=Endpoint, request_method='PUT')
+    def put_endpoint(self, request):
+        with (output_path / 'PUT.json').open('w') as f:
             f.write(request.text)
 
     return App()
@@ -68,3 +80,9 @@ def oauth_redirect_server(temporary_path):
     yield server
 
     server.stop()
+
+
+@pytest.fixture(scope='function', autouse=True)
+def clear_temporary_path(temporary_path):
+    for f in os.scandir(str(temporary_path)):
+        os.unlink(f.path)

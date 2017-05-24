@@ -41,7 +41,8 @@ setup(
     platforms='any',
     install_requires=[
         'aiohttp',
-        'click'
+        'click',
+        'purl'
     ],
     extras_require=dict(
         test=[

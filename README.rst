@@ -65,8 +65,8 @@ Returns the token which needs to be passed by the OAuth provider::
         'token': "..."
     }
 
-``POST /redirect``
-~~~~~~~~~~~~~~~~~~
+``(GET|POST) /redirect``
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The endpoint communicated to the OAuth provider through the redirect_uri. To
 authenticate the request coming from the OAuth provider must contain the

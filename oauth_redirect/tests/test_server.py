@@ -1,4 +1,5 @@
 import json
+import pytest
 import requests
 import time
 
@@ -27,7 +28,8 @@ def test_end_to_end(oauth_redirect_server, json_endpoint):
     # run the whole thing end-to-end
     response = requests.post(register, json={
         'url': json_endpoint.url,
-        'secret': "Area 51"
+        'secret': "Area 51",
+        'method': "POST"
     })
 
     assert response.status_code == 200
@@ -43,7 +45,7 @@ def test_end_to_end(oauth_redirect_server, json_endpoint):
 
     assert response.status_code == 200
 
-    with (json_endpoint.temporary_path / 'request.json').open('r') as f:
+    with (json_endpoint.temporary_path / 'POST.json').open('r') as f:
         received = json.loads(f.read())
 
     assert received['foo'] == 'bar'
@@ -60,7 +62,8 @@ def test_end_to_end(oauth_redirect_server, json_endpoint):
     response = requests.post(register, json={
         'url': json_endpoint.url,
         'ttl': 1,
-        'secret': "Area 51"
+        'secret': "Area 51",
+        'method': "POST"
     })
     data = response.json()
 
@@ -70,3 +73,60 @@ def test_end_to_end(oauth_redirect_server, json_endpoint):
         'foo': 'bar',
         'bar': data['token']
     }).status_code == 404
+
+
+@pytest.mark.parametrize('method', [
+    'GET',
+    'PUT',
+    'POST'
+])
+def test_request_methods(oauth_redirect_server, json_endpoint, method):
+    register = '{}/register/{}'.format(
+        oauth_redirect_server.url, oauth_redirect_server.auth)
+
+    redirect = '{}/redirect'.format(
+        oauth_redirect_server.url)
+
+    # simulate oauth provider that sends post
+    response = requests.post(register, json={
+        'url': json_endpoint.url,
+        'secret': "Area 51",
+        'method': method
+    })
+
+    token = response.json()['token']
+
+    response = requests.post(redirect, json={
+        'foo': 'bar',
+        'bar': token
+    })
+
+    assert response.status_code == 200
+
+    result = json_endpoint.temporary_path / '{}.json'.format(method)
+    with (result).open('r') as f:
+        received = json.loads(f.read())
+
+    assert received['foo'] == 'bar'
+    assert received['bar'] == token
+    assert received['oauth_redirect_secret'] == "Area 51"
+
+    # simulate oauth provider that sends get
+    response = requests.post(register, json={
+        'url': json_endpoint.url,
+        'secret': "Area 51",
+        'method': method
+    })
+
+    token = response.json()['token']
+
+    response = requests.get(redirect + '?foo=bar&bar=' + token)
+    assert response.status_code == 200
+
+    result = json_endpoint.temporary_path / '{}.json'.format(method)
+    with (result).open('r') as f:
+        received = json.loads(f.read())
+
+    assert received['foo'] == 'bar'
+    assert received['bar'] == token
+    assert received['oauth_redirect_secret'] == "Area 51"

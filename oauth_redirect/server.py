@@ -4,11 +4,13 @@ import shelve
 from aiohttp import ClientSession
 from aiohttp import web
 from aiohttp import web_exceptions as ex
+from copy import copy
 from datetime import datetime, timedelta
 from itertools import chain
 from json import JSONDecodeError
 from oauth_redirect import background
 from uuid import uuid4
+from purl import URL
 
 
 def is_authorized(request):
@@ -39,11 +41,28 @@ async def forward_request(token, request):
     token_bound = request.app.db[token]
     url = token_bound['url']
 
-    payload = await request.json(loads=quiet_json)
+    payload = copy(dict(request.query))
+    payload.update(await request.json(loads=quiet_json))
     payload['oauth_redirect_secret'] = token_bound['secret']
 
     async with ClientSession() as session:
-        async with session.post(url, data=json.dumps(payload)) as response:
+
+        if token_bound['method'] == 'GET':
+            url = URL(url)
+
+            for key, value in payload.items():
+                url = url.query_param(key, value)
+
+            def send_request():
+                return session.get(url.as_string())
+        elif token_bound['method'] == 'POST':
+            def send_request():
+                return session.post(url, data=json.dumps(payload))
+        elif token_bound['method'] == 'PUT':
+            def send_request():
+                return session.put(url, data=json.dumps(payload))
+
+        async with send_request() as response:
 
             if response.status == 200:
                 del request.app.db[token]
@@ -112,10 +131,18 @@ async def register(request):
     token = random_token()
 
     try:
+        method = data['method'].upper()
+
+        if method not in ('GET', 'POST', 'PUT'):
+            raise ex.HTTPBadRequest(reason="Unsupported HTTP method {}".format(
+                method
+            ))
+
         request.app.db[token] = {
             'url': data['url'],
             'expiration': datetime.utcnow() + timedelta(seconds=ttl),
-            'secret': data['secret']
+            'secret': data['secret'],
+            'method': method
         }
     except KeyError as e:
         raise ex.HTTPBadRequest(reason="Missing key: {}".format(e.args[0]))
@@ -133,6 +160,7 @@ def create_app(database, auth):
     app.on_startup.append(background.start_tasks)
     app.on_cleanup.append(background.cleanup_tasks)
 
+    app.router.add_get('/redirect', receive_redirect_to)
     app.router.add_post('/redirect', receive_redirect_to)
     app.router.add_post('/register/{auth}', register)
 
