@@ -64,10 +64,11 @@ async def forward_request(token, request):
 
         async with send_request() as response:
 
-            if response.status == 200:
+            if 200 <= response.status < 300:
                 del request.app.db[token]
-
-            return web.Response(status=response.status)
+                return web.HTTPFound(token_bound['success_url'])
+            else:
+                return web.HTTPFound(token_bound['error_url'])
 
 
 def quiet_json(data):
@@ -142,7 +143,9 @@ async def register(request):
             'url': data['url'],
             'expiration': datetime.utcnow() + timedelta(seconds=ttl),
             'secret': data['secret'],
-            'method': method
+            'method': method,
+            'success_url': data['success_url'],
+            'error_url': data['error_url']
         }
     except KeyError as e:
         raise ex.HTTPBadRequest(reason="Missing key: {}".format(e.args[0]))

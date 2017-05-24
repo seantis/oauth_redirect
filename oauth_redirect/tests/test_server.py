@@ -29,7 +29,9 @@ def test_end_to_end(oauth_redirect_server, json_endpoint):
     response = requests.post(register, json={
         'url': json_endpoint.url,
         'secret': "Area 51",
-        'method': "POST"
+        'method': "POST",
+        'success_url': 'http://example.org',
+        'error_url': 'http://example.org'
     })
 
     assert response.status_code == 200
@@ -41,9 +43,9 @@ def test_end_to_end(oauth_redirect_server, json_endpoint):
     response = requests.post(redirect, json={
         'foo': 'bar',
         'bar': data['token']
-    })
+    }, allow_redirects=False)
 
-    assert response.status_code == 200
+    assert response.status_code == 302
 
     with (json_endpoint.temporary_path / 'POST.json').open('r') as f:
         received = json.loads(f.read())
@@ -63,7 +65,9 @@ def test_end_to_end(oauth_redirect_server, json_endpoint):
         'url': json_endpoint.url,
         'ttl': 1,
         'secret': "Area 51",
-        'method': "POST"
+        'method': "POST",
+        'success_url': 'http://example.org',
+        'error_url': 'http://example.org'
     })
     data = response.json()
 
@@ -91,7 +95,9 @@ def test_request_methods(oauth_redirect_server, json_endpoint, method):
     response = requests.post(register, json={
         'url': json_endpoint.url,
         'secret': "Area 51",
-        'method': method
+        'method': method,
+        'success_url': 'http://example.org',
+        'error_url': 'http://example.org',
     })
 
     token = response.json()['token']
@@ -99,9 +105,9 @@ def test_request_methods(oauth_redirect_server, json_endpoint, method):
     response = requests.post(redirect, json={
         'foo': 'bar',
         'bar': token
-    })
+    }, allow_redirects=False)
 
-    assert response.status_code == 200
+    assert response.status_code == 302
 
     result = json_endpoint.temporary_path / '{}.json'.format(method)
     with (result).open('r') as f:
@@ -115,13 +121,18 @@ def test_request_methods(oauth_redirect_server, json_endpoint, method):
     response = requests.post(register, json={
         'url': json_endpoint.url,
         'secret': "Area 51",
-        'method': method
+        'method': method,
+        'success_url': 'http://example.org',
+        'error_url': 'http://example.org',
     })
 
     token = response.json()['token']
 
-    response = requests.get(redirect + '?foo=bar&bar=' + token)
-    assert response.status_code == 200
+    response = requests.get(
+        redirect + '?foo=bar&bar=' + token,
+        allow_redirects=False
+    )
+    assert response.status_code == 302
 
     result = json_endpoint.temporary_path / '{}.json'.format(method)
     with (result).open('r') as f:

@@ -53,10 +53,13 @@ The body of the POST request is a json in this form::
 
     {
         'url': "The url that handles the forwarded OAuth response.",
+        'method': "The method with which the url should be called (get, put or post).",
+        'success_url': "The url the server redirects to if the handler url returns a 2XX code.",
+        'error_url': "The url the server redirects to if the handler url returns a non-2XX code.",
         'ttl': "The optional time to live in seconds (defaults to 3600 seconds)",
         'secret': "A client-specific secret that should be used authenticate
         the forwarded request. If the request does not contain this secret,
-        someone other than oauth_redirect has sent it."
+        someone other than oauth_redirect has sent it.",
     }
 
 Returns the token which needs to be passed by the OAuth provider::
