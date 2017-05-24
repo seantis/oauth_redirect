@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.3.0 (2017-05-24)
+~~~~~~~~~~~~~~~~~~~~~
+
 - Adds the ability to define a success and an error url.
   [href]
 

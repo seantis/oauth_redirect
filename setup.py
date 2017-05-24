@@ -12,7 +12,7 @@ name = 'oauth_redirect'
 description = (
     'Securely redirects OAuth responses to known clients.'
 )
-version = '0.2.0'
+version = '0.3.0'
 
 
 def get_long_description():
